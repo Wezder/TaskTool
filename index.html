@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавление текста</title>
+    <style>
+        .transparent-button {
+            background-color: transparent; /* Прозрачный фон */
+            border: 2px dashed blue; /* Пунктирная граница синего цвета */
+            color: blue; /* Цвет текста синий */
+            padding: 10px 20px; /* Отступы внутри кнопки */
+            font-size: 16px; /* Размер шрифта */
+            cursor: pointer; /* Указатель, указывающий, что это кнопка */
+            transition: background-color 0.3s; /* Плавный переход при наведении */
+            margin-bottom: 10px; /* Отступ снизу для кнопки */
+        }
+
+        .transparent-button:hover {
+            background-color: rgba(0, 0, 255, 0.1); /* Цвет фона при наведении (полупрозрачный синий) */
+        }
+
+        .input-field {
+            margin-bottom: 10px; /* Отступ снизу для поля ввода */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container"></div>
+
+    <script>
+        function createAddTextButton() {
+            const newButton = document.createElement('button');
+            newButton.className = 'transparent-button';
+            newButton.innerText = 'Добавить текст';
+            document.getElementById('container').appendChild(newButton);
+
+            // Слушаем событие клика на новую кнопку
+            newButton.addEventListener('click', function() {
+                // Удаляем только эту кнопку
+                newButton.remove();
+
+                // Создать текстовое поле
+                const inputField = document.createElement('input');
+                inputField.type = 'text';
+                inputField.className = 'input-field';
+                inputField.placeholder = 'Введите текст и нажмите Enter';
+                document.getElementById('container').appendChild(inputField);
+
+                // Слушать событие нажатия клавиши
+                inputField.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        // Получить значение из текстового поля
+                        const textValue = inputField.value;
+
+                        // Создать редактируемый элемент
+                        const editableElement = document.createElement('div');
+                        editableElement.contentEditable = 'true'; // Делаем элемент редактируемым
+                        editableElement.innerText = textValue; // Устанавливаем текст
+                        editableElement.style.border = '1px solid blue'; // Граница для редактируемого поля
+                        editableElement.style.padding = '5px'; // Отступы
+                        editableElement.style.margin = '10px 0'; // Отступы вокруг
+                        document.getElementById('container').appendChild(editableElement);
+
+                        // Создание новой кнопки с той же функцией
+                        createAddTextButton();
+
+                        // Удаляем текстовое поле
+                        inputField.remove();
+                    }
+                });
+            });
+        }
+
+        // Создаём первоначальную кнопку при загрузке страницы
+        createAddTextButton();
+    </script>
+
+</body>
+</html>
