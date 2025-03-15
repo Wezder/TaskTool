@@ -9,6 +9,6 @@ app = FastAPI()
 def root():
     return FileResponse("index.html")
 
-@app.get("/api/users")
+@app.get("/users")
 def get_people(db: Session = Depends(get_db)):
     return db.query(Person).all()
