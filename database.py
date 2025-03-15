@@ -18,6 +18,3 @@ class Person(Base):
 
     def __repr__(self) -> str:
         return f"(id = {self.id!r}, name = {self.name!r}, age = {self.age!r})"
-
-for user in session.scalars(select(Person)):
-    print(user)
