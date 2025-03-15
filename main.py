@@ -1,6 +1,6 @@
 from database import *
 from fastapi import FastAPI, Depends
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
 
 app = FastAPI()
@@ -12,3 +12,10 @@ def root():
 @app.get("/users")
 def get_people(db: Session = Depends(get_db)):
     return db.query(Person).all()
+
+@app.get("/users/{id}")
+def get_people(id, db: Session = Depends(get_db)):
+    person = db.query(Person).get(id)
+    if not person:
+        return JSONResponse(status_code=404, content = {'message': 'Пользователь не найден'})
+    return person
