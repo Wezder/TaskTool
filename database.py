@@ -18,3 +18,10 @@ class Person(Base):
 
     def __repr__(self) -> str:
         return f"(id = {self.id!r}, name = {self.name!r}, age = {self.age!r})"
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

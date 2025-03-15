@@ -3,13 +3,6 @@ from fastapi import FastAPI, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
 app = FastAPI()
 
 @app.get("/")
