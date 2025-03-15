@@ -6,6 +6,7 @@ from sqlalchemy import  Column, Integer, String, select
 SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autoflush=False, bind=engine)
+session = Session(engine)
 
 class Base(DeclarativeBase): pass
 
@@ -16,10 +17,7 @@ class Person(Base):
     age = Column(Integer,)
 
     def __repr__(self) -> str:
-        return f"User(id={self.id!r}, name={self.name!r})"
+        return f"(id = {self.id!r}, name = {self.name!r}, age = {self.age!r})"
 
-session = Session(engine)
-a = select(Person)
-
-for user in session.scalars(a):
+for user in session.scalars(select(Person)):
     print(user)
