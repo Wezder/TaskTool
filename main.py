@@ -1,24 +1,21 @@
-from fastapi import FastAPI
+from database import *
+from fastapi import FastAPI, Depends
 from fastapi.responses import FileResponse
-from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import  Column, Integer, String
+from sqlalchemy.orm import Session
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-
-class Base(DeclarativeBase): pass
-
-class Person(Base):
-    __tablename__ = "people"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    age = Column(Integer, )
-
-Base.metadata.create_all(bind=engine)
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI()
 
 @app.get("/")
 def root():
     return FileResponse("index.html")
+
+@app.get("/api/users")
+def get_people(db: Session = Depends(get_db)):
+    return db.query(Person).all()
