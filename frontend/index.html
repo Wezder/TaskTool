@@ -1,81 +1,202 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавление текста</title>
+    <title>User Management</title>
     <style>
-        .transparent-button {
-            background-color: transparent;
-            border: 2px dashed blue;
-            color: blue;
-            padding: 10px 20px;
-            font-size: 16px;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .form-container {
+            margin-bottom: 20px;
+        }
+        .form-container input {
+            margin-right: 10px;
+        }
+        .form-container button {
+            padding: 5px 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
             cursor: pointer;
-            transition: background-color 0.3s;
-            margin-bottom: 10px;
         }
-
-        .transparent-button:hover {
-            background-color: rgba(0, 0, 255, 0.1);
+        .form-container button:hover {
+            background-color: #218838;
         }
-
-        .input-field {
-            margin-bottom: 10px;
+        .error {
+            color: red;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
+    <h1>Управление пользователями</h1>
 
-    <div id="container"></div>
+    <!-- Add User Form -->
+    <div class="form-container">
+        <h2>Добавить пользователя</h2>
+        <input type="text" id="add-name" placeholder="Имя">
+        <input type="number" id="add-age" placeholder="Возраст">
+        <button onclick="addUser()">Добавить</button>
+        <div id="add-error" class="error"></div>
+    </div>
+
+    <!-- Update User Form -->
+    <div class="form-container">
+        <h2>Обновить пользователя</h2>
+        <input type="number" id="update-id" placeholder="ID">
+        <input type="text" id="update-name" placeholder="Новое имя">
+        <input type="number" id="update-age" placeholder="Новый возраст">
+        <button onclick="updateUser()">Обновить</button>
+        <div id="update-error" class="error"></div>
+    </div>
+
+    <!-- Delete User Form -->
+    <div class="form-container">
+        <h2>Удалить пользователя</h2>
+        <input type="number" id="delete-id" placeholder="ID">
+        <button onclick="deleteUser()">Удалить</button>
+        <div id="delete-error" class="error"></div>
+    </div>
+
+    <!-- User List -->
+    <h2>Список пользователей</h2>
+    <table id="user-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Имя</th>
+                <th>Возраст</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Users will be dynamically populated here -->
+        </tbody>
+    </table>
 
     <script>
-        function createAddTextButton() {
-            const newButton = document.createElement('button');
-            newButton.className = 'transparent-button';
-            newButton.innerText = 'Добавить текст';
-            document.getElementById('container').appendChild(newButton);
+        // Fetch and display users
+        async function fetchUsers() {
+            const response = await fetch('/users');
+            const users = await response.json();
+            const tbody = document.querySelector('#user-table tbody');
+            tbody.innerHTML = ''; // Clear existing rows
 
-            // Слушаем событие клика на новую кнопку
-            newButton.addEventListener('click', function() {
-                // Удаляем только эту кнопку
-                newButton.remove();
-
-                // Создать текстовое поле
-                const inputField = document.createElement('input');
-                inputField.type = 'text';
-                inputField.className = 'input-field';
-                inputField.placeholder = 'Введите текст и нажмите Enter';
-                document.getElementById('container').appendChild(inputField);
-
-                // Слушать событие нажатия клавиши
-                inputField.addEventListener('keypress', function(event) {
-                    if (event.key === 'Enter') {
-                        // Получить значение из текстового поля
-                        const textValue = inputField.value;
-
-                        // Создать редактируемый элемент
-                        const editableElement = document.createElement('div');
-                        editableElement.contentEditable = 'true'; // Делаем элемент редактируемым
-                        editableElement.innerText = textValue; // Устанавливаем текст
-                        editableElement.style.border = '1px solid blue'; // Граница для редактируемого поля
-                        editableElement.style.padding = '5px'; // Отступы
-                        editableElement.style.margin = '10px 0'; // Отступы вокруг
-                        document.getElementById('container').appendChild(editableElement);
-
-                        // Создание новой кнопки с той же функцией
-                        createAddTextButton();
-
-                        // Удаляем текстовое поле
-                        inputField.remove();
-                    }
-                });
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.age}</td>
+                `;
+                tbody.appendChild(row);
             });
         }
 
-        // Создаём первоначальную кнопку при загрузке страницы
-        createAddTextButton();
-    </script>
+        // Add user
+        async function addUser() {
+            const name = document.getElementById('add-name').value;
+            const age = document.getElementById('add-age').value;
+            const errorDiv = document.getElementById('add-error');
 
+            if (!name || !age) {
+                errorDiv.textContent = 'Please fill in all fields.';
+                return;
+            }
+
+            const response = await fetch('/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, age: parseInt(age) })
+            });
+
+            if (response.ok) {
+                errorDiv.textContent = '';
+                document.getElementById('add-name').value = '';
+                document.getElementById('add-age').value = '';
+                fetchUsers();
+            } else {
+                errorDiv.textContent = 'Failed to add user.';
+            }
+        }
+
+        // Update user
+        async function updateUser() {
+            const id = document.getElementById('update-id').value;
+            const name = document.getElementById('update-name').value;
+            const age = document.getElementById('update-age').value;
+            const errorDiv = document.getElementById('update-error');
+
+            if (!id) {
+                errorDiv.textContent = 'ID is required.';
+                return;
+            }
+
+            const response = await fetch(`/users/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: name || undefined,
+                    age: age ? parseInt(age) : undefined
+                })
+            });
+
+            if (response.ok) {
+                errorDiv.textContent = '';
+                document.getElementById('update-id').value = '';
+                document.getElementById('update-name').value = '';
+                document.getElementById('update-age').value = '';
+                fetchUsers();
+            } else {
+                errorDiv.textContent = 'Failed to update user.';
+            }
+        }
+
+        // Delete user
+        async function deleteUser() {
+            const id = document.getElementById('delete-id').value;
+            const errorDiv = document.getElementById('delete-error');
+
+            if (!id) {
+                errorDiv.textContent = 'ID is required.';
+                return;
+            }
+
+            const response = await fetch(`/users/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                errorDiv.textContent = '';
+                document.getElementById('delete-id').value = '';
+                fetchUsers();
+            } else {
+                errorDiv.textContent = 'Failed to delete user.';
+            }
+        }
+
+        // Initial fetch of users
+        fetchUsers();
+    </script>
 </body>
 </html>
